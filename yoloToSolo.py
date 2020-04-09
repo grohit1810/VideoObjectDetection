@@ -9,24 +9,29 @@ import cv2
 import csv
 import os
 #%%
-
+"""
+    Getting the images from the YOLO data
+"""
 class ProcessYOLOImages:
     def __init__(self):
         data_dir = os.path.dirname(os.path.realpath(__file__))
+        # Data file
         yolo_pkl_path = data_dir + "\Code\ReseachTopicsAssignment2\TinyYolo.pkl"
         self.data = pickle.load(open(yolo_pkl_path, "rb"))
         self.images_dir = data_dir + "\Code\ReseachTopicsAssignment2\imageDir\\"
         self.sedans_dir = data_dir + "\imagesdata\yolodata\sedans\\"
         self.hatchbacks_dir = data_dir + "\imagesdata\yolodata\hatchbacks\\"
-        
+        #Ground truth file
         self.csv_file = data_dir + "\Ground_Truth.csv"
         
-        car_key = 2
-        image_key = 'image'
+        # Label of the car class
+        self.car_key = 2
+        self.image_key = 'image'
         
-        sedan_index = 1
-        hatchback_index = 5
-        image_index = 0
+        # Indexes in csv file 
+        self.sedan_index = 1
+        self.hatchback_index = 5
+        self.image_index = 0
     
     def processImages(self):
         with open(self.csv_file, newline='') as file:
@@ -35,7 +40,7 @@ class ProcessYOLOImages:
             next(reader)
             for row in reader:
                 line = row[0].split(',')
-                image_name = "image" + line[image_index] + ".jpg"
+                image_name = "image" + line[self.image_index] + ".jpg"
                 total_cars = int(line[11])
                 if total_cars > 0:
                     value = self.data[image_name]
@@ -46,10 +51,10 @@ class ProcessYOLOImages:
                     car_indexes = car_indexes[:1]
         
                     for index in car_indexes:
-                        isHatchback = index >= hatchback_index
-                        isSedan = index < hatchback_index
-                        if len(object_ids) > 0 and car_key in object_ids:
-                            car_indices = [i for i, x in enumerate(object_ids) if x == car_key]
+                        isHatchback = index >= self.hatchback_index
+                        isSedan = index < self.hatchback_index
+                        if len(object_ids) > 0 and self.car_key in object_ids:
+                            car_indices = [i for i, x in enumerate(object_ids) if x == self.car_key]
                             confidences_list = [confidences[i] for i in car_indices]
                             max_confidence = max(confidences_list)
                             max_conf_index = confidences.index(max_confidence)
