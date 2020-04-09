@@ -1,0 +1,9 @@
+Hatchback - 1
+Sedan - 1
+
+Colours :
+Black - 0
+Silver - 1
+Red - 2
+White - 3
+Blue - 4
