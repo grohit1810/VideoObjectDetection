@@ -235,7 +235,7 @@ class TransferLearning:
                                       callbacks=[self.reducelr, self.earlystop, 
                                                   self.lambdacb, self.tensorboard, self.checkpoint])
         # Save model to disk
-        self.model.save("car_classifier.h5")
+        self.model.save(current_dir + "/car_classifier.h5")
         self.plot_train_test_accuracy_loss()
         
     """
@@ -274,7 +274,7 @@ class TransferLearning:
                 "actual": actual,
                 "predicted": predicted
                 }
-        pickle.dump(predictions, open("transferLearningpredictions.pkl", "wb"))
+        pickle.dump(predictions, open(current_dir + "/transferLearningpredictions.pkl", "wb"))
 # =============================================================================
 #         print('Classification Report')
 #         cr = classification_report(y_true=self.test_generator.classes, y_pred=y, target_names=self.test_generator.class_indices)
@@ -284,6 +284,6 @@ class TransferLearning:
 #%%
 if __name__ == "__main__":
     tl = TransferLearning()
-    tl.train_model()
-    #tl.load_model()
+    #tl.train_model()
+    tl.load_model()
     tl.test_model_yolo_data()
