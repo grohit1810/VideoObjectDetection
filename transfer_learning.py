@@ -29,6 +29,7 @@ from tensorflow.keras.regularizers import l2
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
+import cv2
 
 warnings.filterwarnings("ignore")
 #%matplotlib inline
@@ -36,7 +37,7 @@ warnings.filterwarnings("ignore")
 #%%time
 
 epochs = 10 # Number of epochs
-batch_size = 10 #Batch size
+#batch_size = 10 #Batch size
 testsplit = .2 # Train and validation split
 targetx = 512 # Target shape
 targety = 512
@@ -49,7 +50,7 @@ seed = 15
 # Directories where the train validation and test data is stored
 data_dir = current_dir + "\imagesdata\data\\" 
 validation_dir = current_dir + "\imagesdata\\validationdata\\"
-test_dir = current_dir + "\imagesdata\yolodata\\"
+test_dir = current_dir + "\CropImageOutput\\"
 
 #%%
 
@@ -67,13 +68,30 @@ class TransferLearning:
     
     def start_train(self, logs):
         os.system("echo Beginning training")
-        
+      
+    
+    def save_model(self, name="car_classifier.h5"):
+        # Save model to disk
+        print("Saving model")
+        self.model.save(current_dir + "\\" + name)
     """
         Method to load a saved model
     """
-    def load_model(self, name="car_classifier.h5"):
-        self.model = keras.models.load_model(name)
+    def load_model(self, name="car_classifier.h5", new=False):
+        model = keras.models.load_model(current_dir + "\\" + name)
+        if (new):
+            return model
+        self.model = model
     
+    
+    def copy_weights(self):
+        trained_model = self.load_model(new=True)
+        weights = trained_model.get_weights()
+        self.model.set_weights(weights)
+        self.model.compile(optimizer=self.optimizer,
+                      loss=self.loss,
+                      metrics=["accuracy"])
+        self.save_model("car_classifier_batch_size_1.h5")
     """
         Method which initializes the model parameters
     """
@@ -115,8 +133,10 @@ class TransferLearning:
         model = Model(inputs=base_model.input, outputs=predictions)
         #Adam optimizer to make use of adaptive learning rate for all parameters
         optimizer = Adam(lr=learning_rate)
+        self.optimizer = optimizer
         # using cross entropy loss
         loss = "categorical_crossentropy"
+        self.loss = loss
         #loss = "binary_crossentropy"
         
         #Freezing the pre trained layers
@@ -129,8 +149,11 @@ class TransferLearning:
                       metrics=["accuracy"])
         
         self.model = model
+        if (self.batch_size == 1):
+            self.copy_weights()
         
-    def __init__(self):
+    def __init__(self, batch_size=10):
+        self.batch_size = batch_size
         # Image generator
         self.datagen = ImageDataGenerator(
                         # Prevent flipping as test data does not have flipped images
@@ -163,14 +186,16 @@ class TransferLearning:
                                         subset="validation")
         
         # Test image generator from the YOLO images
-        self.test_generator = self.datagen.flow_from_directory(
-                                    test_dir,
-                                    target_size=(targetx, targety),
-                                    batch_size=batch_size,
-                                    #class_mode="binary",
-                                    class_mode='categorical',
-                                    shuffle=True,
-                                    seed=seed)
+# =============================================================================
+#         self.test_generator = self.datagen.flow_from_directory(
+#                                     test_dir,
+#                                     target_size=(targetx, targety),
+#                                     batch_size=batch_size,
+#                                     #class_mode="binary",
+#                                     class_mode='categorical',
+#                                     shuffle=True,
+#                                     seed=seed)
+# =============================================================================
         #Adding checkpoint to save parameters of model 
         self.checkpoint = ModelCheckpoint('car_type_classifier.h5',
                              monitor='val_accuracy',
@@ -234,9 +259,8 @@ class TransferLearning:
                                       epochs=epochs,
                                       callbacks=[self.reducelr, self.earlystop, 
                                                   self.lambdacb, self.tensorboard, self.checkpoint])
-        # Save model to disk
-        self.model.save(current_dir + "/car_classifier.h5")
-        self.plot_train_test_accuracy_loss()
+        self.save_model("car_classifier.h5")
+        self.plot_train_test_accuracy_loss()        
         
     """
         Plot of training and test accuray vs number of epochs
@@ -255,35 +279,36 @@ class TransferLearning:
         plt.plot(self.params.epoch, self.params.history['val_loss'], label='Test loss')
         plt.legend()
         plt.show()
-    
+ 
     """
-        Prediction of the model on the yolo data
+        Writing the predictions to pickle file
     """
-    def test_model_yolo_data(self):
-        self.test_generator.reset()
-        # Predicting on the test data
-        predictions = self.model.predict_generator(self.test_generator, steps=len(self.test_generator))
+    def write_prediction_to_pkl(self, filename, prediction):
+        path = current_dir + "\predictions.pkl" 
+        pickle_dict = False
+        try:
+            with open(path, "rb") as f:
+                pickle_dict = pickle.load(f)
+        except Exception:
+            with open(path, "wb") as f:
+                pickle.dump({}, f)
+        
+        if (not pickle_dict):    
+            pickle_dict = pickle.load(open(path, "rb"))
+        pickle_dict[filename] = prediction
+        pickle.dump(pickle_dict, open(path, "wb"))
+
+    def test_model_yolo_image(self, filename):
+        image = cv2.imread(test_dir + "/" + filename)
+        image.resize(targetx, targety, 3)
+        image = preprocess_input(image)
+        predictions = self.model.predict([np.expand_dims(image, axis=0)], self.batch_size)
         y = np.argmax(predictions, axis=1)
-        print("Accuracy ", accuracy_score(self.test_generator.classes, y))
-        predictions = {}
-        #Saving results to pickle file
-        for i in range(len(y)):
-            predicted = y[i]
-            actual = self.test_generator.classes[i]
-            predictions[i] = {
-                "actual": actual,
-                "predicted": predicted
-                }
-        pickle.dump(predictions, open(current_dir + "/transferLearningpredictions.pkl", "wb"))
-# =============================================================================
-#         print('Classification Report')
-#         cr = classification_report(y_true=self.test_generator.classes, y_pred=y, target_names=self.test_generator.class_indices)
-#         print(cr)
-# =============================================================================
+        self.write_prediction_to_pkl(filename, y[0])
 
 #%%
 if __name__ == "__main__":
-    tl = TransferLearning()
+    #tl = TransferLearning()
     #tl.train_model()
-    tl.load_model()
-    tl.test_model_yolo_data()
+    tfprediction = TransferLearning(batch_size=1)
+    #tfprediction.test_model_yolo_image("image1440.jpg")
