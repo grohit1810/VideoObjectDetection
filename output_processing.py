@@ -22,6 +22,8 @@ class ProcessOutput:
         y_true = []
         y_predicted = []
         gt_predictions_dict = {}
+        sedan_count = 0
+        hatchback_count = 0
 
         with open(current_dir + "\Ground_Truth.csv") as gt_csv:
             reader = csv.reader(gt_csv, delimiter=' ', quotechar='/')
@@ -37,6 +39,8 @@ class ProcessOutput:
                     for index in car_indexes:
                         is_hatchback = index >= 5
                         is_sedan = index < 5
+                        if is_sedan:
+                            sedan_count += 1
                         actual_class = 0 if is_hatchback else 1
                         try:
                             predicted_class = predictions_dict[frame_num]
