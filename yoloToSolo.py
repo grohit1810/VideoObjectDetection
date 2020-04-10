@@ -59,7 +59,7 @@ class ProcessYOLOImages:
                             max_confidence = max(confidences_list)
                             max_conf_index = confidences.index(max_confidence)
                             bounding_box = box[max_conf_index]
-                            
+
                             x = bounding_box[0]
                             y = bounding_box[1]
                             w = bounding_box[2]

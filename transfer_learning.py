@@ -16,7 +16,7 @@ from sklearn.metrics import classification_report, accuracy_score
 from tensorflow import keras
 from tensorflow.keras import backend as K
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *
@@ -302,8 +302,8 @@ class TransferLearning:
 
 #%%
 if __name__ == "__main__":
-    #tl = TransferLearning()
-    #tl.train_model()
+    tl = TransferLearning()
+    tl.train_model()
     tfprediction = TransferLearning(batch_size=1)
     tfprediction.test()
     #tfprediction.test_model_yolo_image("image1440.jpg")
