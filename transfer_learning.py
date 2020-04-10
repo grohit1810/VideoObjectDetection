@@ -284,7 +284,7 @@ class TransferLearning:
         
         if (not pickle_dict):
             pickle_dict = pickle.load(open(path, "rb"))
-        pickle_dict[filename[5:-4]] = prediction
+        pickle_dict[filename] = prediction
         pickle.dump(pickle_dict, open(path, "wb"))
 
     def test_model_yolo_image(self, filename):
@@ -293,7 +293,7 @@ class TransferLearning:
         image = preprocess_input(image)
         predictions = self.model.predict([np.expand_dims(image, axis=0)], self.batch_size)
         y = np.argmax(predictions, axis=1)
-        print(y)
+        print(y[0])
         self.write_prediction_to_pkl(filename, y[0])
     
     def test(self):
@@ -302,11 +302,11 @@ class TransferLearning:
 
 #%%
 if __name__ == "__main__":
-    tl = TransferLearning()
-    tl.train_model()
+    #tl = TransferLearning()
+    #tl.train_model()
     tfprediction = TransferLearning(batch_size=1)
     tfprediction.test()
     #tfprediction.test_model_yolo_image("image1440.jpg")
-    x = pickle.load(open(current_dir + "\predictions.pkl" , "rb"))
-    print(x)
+    #x = pickle.load(open(current_dir + "\predictions.pkl" , "rb"))
+    #print(x)
     

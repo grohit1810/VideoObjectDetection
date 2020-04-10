@@ -17,6 +17,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 class ProcessOutput:
     def process_predictions_pkl(self):
         predictions_dict = pickle.load(open(current_dir + "\predictions.pkl", "rb"))
+        print(predictions_dict)
         tiny_yolo_pkl = pickle.load(open(current_dir + "\TinyYolo.pkl", "rb"))
         no_of_frames_not_in_pred = 0
         y_true = []
@@ -41,6 +42,8 @@ class ProcessOutput:
                         is_sedan = index < 5
                         if is_sedan:
                             sedan_count += 1
+                        if is_hatchback:
+                            hatchback_count += 1
                         actual_class = 0 if is_hatchback else 1
                         try:
                             predicted_class = predictions_dict[frame_num]
