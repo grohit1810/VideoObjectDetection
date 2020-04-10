@@ -28,7 +28,30 @@ class ProcessOutput:
         
         self.frame_count_map = frame_count_map
         self.frame_car_map = frame_car_map
+    
+    def process_color_pkl(self):
+        color_dict = pickle.load(open(current_dir + "\color_detection.pkl", "rb"))
+        frame_color_map = defaultdict(lambda: defaultdict(int))
+        for key in color_dict:
+            frame_num = key[7: -4]
+            frame_color_map[frame_num][color_dict[key]] += 1
+        self.frame_color_map = frame_color_map
         
+    def get_color_from_position(self, position):
+        positions = {
+                1: "Black",
+                2: "Silver",
+                3: "Red",
+                4: "White",
+                5: "Blue",
+                6: "Black",
+                7: "Silver",
+                8: "Red",
+                9: "White",
+                10: "Blue"
+            }
+        return positions[position]
+    
     def process_predictions_pkl(self):
         pred_frame_count_map = self.frame_count_map
         y_count_true = []
@@ -41,6 +64,9 @@ class ProcessOutput:
         fnhb = 0
         fpsd = 0
         fnsd = 0
+        
+        correctly_predicted_colors = 0
+        total_colors = 0
 
         with open(current_dir + "\Ground_Truth.csv") as gt_csv:
             reader = csv.reader(gt_csv, delimiter=' ', quotechar='/')
@@ -57,10 +83,17 @@ class ProcessOutput:
                 except Exception:
                     y_count_predicted.append(0)
                 
-                # Calculations for Q2
+                # Calculations for Q2 and Q3
                 if total_cars > 0:
                     car_indexes = [ i for i, x in enumerate(line[: -1]) if x == '1']
+                    car_indexes = [x for x in car_indexes if x!= 0]
                     for index in car_indexes:
+                        actual_color = self.get_color_from_position(index)
+                        predicted_colors = self.frame_color_map[frame_num]
+                        if (actual_color in predicted_colors.keys()):
+                            correctly_predicted_colors += 1
+                        total_colors += 1
+
                         predicted = self.frame_car_map[frame_num]
                         is_true_hatchback = index >= 6
                         is_true_sedan = index < 6 and index > 0
@@ -91,8 +124,10 @@ class ProcessOutput:
 
         print("The F1 score for Q1 is", f1_score(y_count_true, y_count_predicted, average="weighted"))
         print("The F1 score for Q2 is", f1_model)
+        print("Accuracy for Q3 is", correctly_predicted_colors / total_colors)
 
 if __name__ == "__main__":
     p = ProcessOutput()
+    p.process_color_pkl()
     p.process_pkl_count()
     p.process_predictions_pkl()
