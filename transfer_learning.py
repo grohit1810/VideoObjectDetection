@@ -39,9 +39,9 @@ warnings.filterwarnings("ignore")
 epochs = 10 # Number of epochs
 batch_size = 10 #Batch size
 testsplit = .2 # Train and validation split
-targetx = 512 # Target shape
-targety = 512
-learning_rate = 0.001 # Learning rate
+targetx = 128 # Target shape
+targety = 64
+learning_rate = 0.0001 # Learning rate
 classes = 2 # Number of classes for classification
 #seed = random.randint(1, 1000)
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -146,8 +146,9 @@ class TransferLearning:
         # Instanciating model
         model.compile(optimizer=optimizer,
                       loss=loss,
+                      # the mertics that are to be taken into account
                       metrics=["accuracy"])
-        
+
         self.model = model
         if (self.batch_size == 1):
             self.copy_weights()
