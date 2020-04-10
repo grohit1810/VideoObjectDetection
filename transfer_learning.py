@@ -37,7 +37,7 @@ warnings.filterwarnings("ignore")
 #%%time
 
 epochs = 10 # Number of epochs
-#batch_size = 10 #Batch size
+batch_size = 10 #Batch size
 testsplit = .2 # Train and validation split
 targetx = 512 # Target shape
 targety = 512
@@ -184,18 +184,7 @@ class TransferLearning:
                                         shuffle=False,
                                         seed=seed,
                                         subset="validation")
-        
-        # Test image generator from the YOLO images
-# =============================================================================
-#         self.test_generator = self.datagen.flow_from_directory(
-#                                     test_dir,
-#                                     target_size=(targetx, targety),
-#                                     batch_size=batch_size,
-#                                     #class_mode="binary",
-#                                     class_mode='categorical',
-#                                     shuffle=True,
-#                                     seed=seed)
-# =============================================================================
+    
         #Adding checkpoint to save parameters of model 
         self.checkpoint = ModelCheckpoint('car_type_classifier.h5',
                              monitor='val_accuracy',
@@ -293,9 +282,9 @@ class TransferLearning:
             with open(path, "wb") as f:
                 pickle.dump({}, f)
         
-        if (not pickle_dict):    
+        if (not pickle_dict):
             pickle_dict = pickle.load(open(path, "rb"))
-        pickle_dict[filename] = prediction
+        pickle_dict[filename[5:-4]] = prediction
         pickle.dump(pickle_dict, open(path, "wb"))
 
     def test_model_yolo_image(self, filename):
@@ -304,11 +293,20 @@ class TransferLearning:
         image = preprocess_input(image)
         predictions = self.model.predict([np.expand_dims(image, axis=0)], self.batch_size)
         y = np.argmax(predictions, axis=1)
+        print(y)
         self.write_prediction_to_pkl(filename, y[0])
+    
+    def test(self):
+        for image in os.listdir(test_dir):
+            self.test_model_yolo_image(image)
 
 #%%
 if __name__ == "__main__":
     #tl = TransferLearning()
     #tl.train_model()
     tfprediction = TransferLearning(batch_size=1)
+    tfprediction.test()
     #tfprediction.test_model_yolo_image("image1440.jpg")
+    x = pickle.load(open(current_dir + "\predictions.pkl" , "rb"))
+    print(x)
+    

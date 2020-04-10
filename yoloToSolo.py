@@ -18,7 +18,7 @@ class ProcessYOLOImages:
         # Data file
         yolo_pkl_path = data_dir + "\Code\ReseachTopicsAssignment2\TinyYolo.pkl"
         self.data = pickle.load(open(yolo_pkl_path, "rb"))
-        self.images_dir = data_dir + "\Code\ReseachTopicsAssignment2\imageDir\\"
+        self.images_dir = data_dir + "\imageDir\\"
         self.sedans_dir = data_dir + "\imagesdata\yolodata\sedans\\"
         self.hatchbacks_dir = data_dir + "\imagesdata\yolodata\hatchbacks\\"
         #Ground truth file
