@@ -39,15 +39,22 @@ class Plots:
         figure(figsize=(20,10))
         plt.subplot(1, 3, 1)
         plt.title("Object detection time in seconds")
+        plt.xlabel('Frame Number')
+        plt.ylabel('Time in seconds')
         plt.plot(obj_data[:, 0], obj_data[:, 1])
         
         plt.subplot(1, 3, 2)
         plt.title("Car detection time in seconds")
+        plt.xlabel('Frame Number')
+        plt.ylabel('Time in seconds')
         plt.plot(car_data[:, 0], car_data[:, 1])
         
         plt.subplot(1, 3, 3)
         plt.title("Color detection time in seconds")
+        plt.xlabel('Frame Number')
+        plt.ylabel('Time in seconds')
         plt.plot(color_data[:, 0], color_data[:, 1])
+        plt.savefig('Detection time in seconds.png')
         
 if __name__ == "__main__":
     pl = Plots().plot()

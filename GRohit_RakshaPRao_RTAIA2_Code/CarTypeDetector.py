@@ -35,9 +35,7 @@ import pickle
 import cv2
 
 warnings.filterwarnings("ignore")
-#%matplotlib inline
-#%system nvidia-smi
-#%%time
+
 
 epochs = 10 # Number of epochs
 batch_size = 10 #Batch size
@@ -55,7 +53,7 @@ data_dir = "./trainingData/data/"
 validation_dir = "./trainingData/validationdata/"
 test_dir = "./CropImageDir/"
 
-#%%
+
 
 class TransferLearning:
     """"
@@ -296,13 +294,13 @@ class TransferLearning:
         predictions = self.model.predict([np.expand_dims(image, axis=0)], self.batch_size)
         y = np.argmax(predictions, axis=1)
         self.write_prediction_to_pkl(filename, y[0])
-        return "sedan" if y[0] == 0 else "hatchback"
+        return "Sedan" if y[0] == 0 else "Hatchback"
     
     def test(self):
         for image in os.listdir(test_dir):
             print(self.test_model_yolo_image(image))
 
-#%%
+
 if __name__ == "__main__":
     #tl = TransferLearning()
     #tl.train_model()

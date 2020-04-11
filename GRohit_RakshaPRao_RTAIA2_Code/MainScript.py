@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Apr 10 02:44:32 2020
+Created on Sat Apr 04 02:44:32 2020
 
 @author: grohit
 """
@@ -8,6 +8,7 @@ from VideoReader import ConvertVideoToFrames
 from ObjectDetectorTinyYolo import TinyYolo
 from CarColorDetector import ColorDetection
 from CarTypeDetector import TransferLearning
+from VideoFileWriter import ConvertFramesToVideo
 from Results import GetResults
 from Plots import Plots
 import time
@@ -28,7 +29,7 @@ def get_files(folder_name):
     return files
 
 #Q1
-def question1():
+def reader():
     videoToFrames = ConvertVideoToFrames()
     beforetime = time.time()
     files = videoToFrames.convert_video_to_frames()
@@ -38,7 +39,7 @@ def question1():
     return files,q1_time
 
 #Q2
-def question2(files):
+def detector(files):
     tinyYolo = TinyYolo()
     class_ids, confidences, boxes = tinyYolo.bound_and_crop_image(files[0])
     for file in files:
@@ -49,7 +50,7 @@ def question2(files):
     pickle.dump(yolo_output,open("TinyYolo.pkl",'wb'))
     
 #Q3
-def question3(croppedFiles, cropDir = "CropImageDir/"):
+def type_classifier(croppedFiles, cropDir = "CropImageDir/"):
     transferLearning = TransferLearning(batch_size=1)
     for file in croppedFiles:
         if(file.startswith("1_")):
@@ -70,7 +71,7 @@ def question3(croppedFiles, cropDir = "CropImageDir/"):
             final_output[frameNumber]['TypeDetectionTime'] = round((aftertime-beforetime), 3)
 
 #Q4
-def question4(croppedFiles, cropDir = 'CropImageDir/'):
+def color_classifier(croppedFiles, cropDir = 'CropImageDir/'):
     colDetection = ColorDetection()
     for file in croppedFiles:
         if(file.startswith("1_")):
@@ -135,13 +136,19 @@ def get_results(output):
 
 def show_plots():
     Plots().plot()
+    
+def writer():
+    converter = ConvertFramesToVideo()
+    converter.frames_to_video('Final Output Images/', 'Rohit_Raksha_CaseStudyAssignment2_video.mp4', 25.0)
 
-yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
-#image_files, q1_time = question1() # for faster runtime comment this line
-#question2(image_files)  # for faster runtime comment this line
+
+#yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
+image_files, q1_time = reader() # for faster runtime comment this line
+detector(image_files)  # for faster runtime comment this line
 croppedFiles = get_files(cropDir)
-question3(croppedFiles)
-question4(croppedFiles)
+type_classifier(croppedFiles)
+color_classifier(croppedFiles)
 process_output()
 get_results(final_output)
 show_plots()
+writer()
