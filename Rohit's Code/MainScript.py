@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Apr 11 02:44:32 2020
+Created on Sat Apr 10 02:44:32 2020
 
 @author: grohit
 """
@@ -8,6 +8,7 @@ from VideoReader import ConvertVideoToFrames
 from ObjectDetectorTinyYolo import TinyYolo
 from CarColorDetector import ColorDetection
 from CarTypeDetector import TransferLearning
+from Results import GetResults
 import time
 import pickle
 import cv2
@@ -47,7 +48,6 @@ def question2(files):
     pickle.dump(yolo_output,open("TinyYolo.pkl",'wb'))
     
 #Q3
-
 def question3(croppedFiles, cropDir = "CropImageDir/"):
     transferLearning = TransferLearning(batch_size=1)
     for file in croppedFiles:
@@ -129,6 +129,9 @@ def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output
         cv2.imwrite(final_image_folder + "/image"+frame+".jpg",image_file)
     file.close()
 
+def get_results(output):
+    GetResults().get_results(output)
+
 yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
 #image_files, q1_time = question1() # for faster runtime comment this line
 #question2(image_files)  # for faster runtime comment this line
@@ -136,6 +139,4 @@ croppedFiles = get_files(cropDir)
 question3(croppedFiles)
 question4(croppedFiles)
 process_output()
-
-
-
+get_results(final_output)
