@@ -143,7 +143,7 @@ def show_plots():
     
 def writer():
     converter = ConvertFramesToVideo()
-    converter.frames_to_video('Final Output Images/', 'Rohit_Raksha_CaseStudyAssignment2_video.mp4', 25.0)
+    converter.frames_to_video('Final Output Images/', 'Rohit_Raksha_RTAIAssignment2_video.mp4', 25.0)
 
 
 #yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
