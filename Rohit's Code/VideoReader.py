@@ -4,10 +4,10 @@ Created on Sat Apr 04 02:21:56 2020
 
 @author: grohit
 """
-
 import os
 import cv2
-
+import sys
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 class ConvertVideoToFrames():
     def __init__(self,video = "video.mp4", dirName = "imageDir"):

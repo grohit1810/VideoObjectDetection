@@ -51,9 +51,9 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 seed = 15
 
 # Directories where the train validation and test data is stored
-data_dir = current_dir + "\imagesdata\data\\" 
-validation_dir = current_dir + "\imagesdata\\validationdata\\"
-test_dir = current_dir + "\CropImageDir\\"
+data_dir = "./trainingData/data/" 
+validation_dir = "./trainingData/validationdata/"
+test_dir = "./CropImageDir/"
 
 #%%
 

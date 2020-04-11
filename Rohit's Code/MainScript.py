@@ -4,14 +4,14 @@ Created on Sat Apr 11 02:44:32 2020
 
 @author: grohit
 """
-
 from VideoReader import ConvertVideoToFrames
 from ObjectDetectorTinyYolo import TinyYolo
 from CarColorDetector import ColorDetection
+from CarTypeDetector import TransferLearning
 import time
 import pickle
-import os
 import cv2
+import os
 
 q1_time= 0
 yolo_output = {}
@@ -46,6 +46,28 @@ def question2(files):
         yolo_output[file[file.rfind('/')+1:]] = (class_ids, confidences, boxes, round((aftertime-beforetime), 3))
     pickle.dump(yolo_output,open("TinyYolo.pkl",'wb'))
     
+#Q3
+
+def question3(croppedFiles, cropDir = "CropImageDir/"):
+    transferLearning = TransferLearning(batch_size=1)
+    for file in croppedFiles:
+        if(file.startswith("1_")):
+            beforetime = time.time()
+            frameName = file[2:]
+            frameNumber = file[7:len(file)-4]
+            car_type = transferLearning.test_model_yolo_image(file, cropDir)
+            if(frameNumber not in final_output.keys()):
+                final_output[frameNumber] = {}
+                final_output[frameNumber]['Count'] = 1
+                final_output[frameNumber]['Frame No'] = frameNumber
+            final_output[frameNumber]['Type1'] = car_type
+            if("2_"+frameName in croppedFiles):
+                car_type = transferLearning.test_model_yolo_image(file, cropDir)
+                final_output[frameNumber]['Count'] = 2
+                final_output[frameNumber]['Type2'] = car_type
+            aftertime = time.time()
+            final_output[frameNumber]['TypeDetectionTime'] = round((aftertime-beforetime), 3)
+
 #Q4
 def question4(croppedFiles, cropDir = 'CropImageDir/'):
     colDetection = ColorDetection()
@@ -84,14 +106,14 @@ def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output
         image_file = cv2.imread(videoReader.dir_to_save + "/image"+frame+".jpg")
         if frame in final_output.keys():
             color1 = final_output[frame]['Color1']
-            #carType1 = final_output[frame]['Type1'] 
+            carType1 = final_output[frame]['Type1'] 
             count = str(final_output[frame]['Count'])
             box = yolo_output['image'+frame+".jpg"][2][0]
             x,y,w,h = box[0],box[1],box[2],box[3]
             draw_box_with_annotations(image_file,round(x), round(y), round(x+w), round(y+h),carType1,color1)
             if 'Color2' in final_output[frame].keys():
                 color2 = final_output[frame]['Color1']
-                #carType2 = final_output[frame]['Type1'] 
+                carType2 = final_output[frame]['Type1'] 
                 box = yolo_output['image'+str(frame)+".jpg"][2][1]
                 x,y,w,h = box[0],box[1],box[2],box[3]
                 draw_box_with_annotations(image_file,round(x), round(y), round(x+w), round(y+h),carType2,color2)
@@ -107,11 +129,11 @@ def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output
         cv2.imwrite(final_image_folder + "/image"+frame+".jpg",image_file)
     file.close()
 
-#yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
-image_files, q1_time = question1() # for faster runtime comment this line
-question2(image_files)  # for faster runtime comment this line
+yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
+#image_files, q1_time = question1() # for faster runtime comment this line
+#question2(image_files)  # for faster runtime comment this line
 croppedFiles = get_files(cropDir)
-#question3
+question3(croppedFiles)
 question4(croppedFiles)
 process_output()
 
