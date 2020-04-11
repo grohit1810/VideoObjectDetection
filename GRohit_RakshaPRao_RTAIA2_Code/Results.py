@@ -15,7 +15,13 @@ colors = ["black", "silver", "red", "white", "blue"]
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
+"""
+    This class calcualtes f1 score and accuracy for all the queries
+"""
 class GetResults:
+    """
+        Creating map of frame and car type in each frame
+    """
     def process_pkl_count(self):
         predictions_dict = pickle.load(open(current_dir + "\predictions.pkl", "rb"))
         frame_count_map = defaultdict(int)
@@ -29,6 +35,9 @@ class GetResults:
         self.frame_count_map = frame_count_map
         self.frame_car_map = frame_car_map
     
+    """
+        Getting the color of cars for each frame
+    """
     def process_color_pkl(self):
         frame_color_map = defaultdict(lambda: defaultdict(int))
         for key in self.output:
@@ -38,7 +47,10 @@ class GetResults:
             if ("Color2" in data):
                 frame_color_map[frame_num][data["Color2"]] += 1            
         self.frame_color_map = frame_color_map
-        
+    
+    """
+        Mapping of the csv index to color
+    """
     def get_color_from_position(self, position):
         positions = {
                 1: "Black",
@@ -54,11 +66,15 @@ class GetResults:
             }
         return positions[position]
     
+    """
+        Calculating acccuracy and f1 score
+    """
     def process_predictions_pkl(self):
         pred_frame_count_map = self.frame_count_map
         y_count_true = []
         y_count_predicted = []
         
+        # true positive, false positive and false negative count for the two classes of cars
         tphb = 0
         tpsd = 0
         tphb = 0
@@ -78,8 +94,10 @@ class GetResults:
                 line = row[0].split(',')
                 frame_num = line[0]
                 total_cars = int(line[11])
+                #Actual number of cars in each frame
                 y_count_true.append(total_cars)
                 try:
+                    # Adding count of car to frame
                     y_count_predicted.append(pred_frame_count_map[frame_num])
                 except Exception:
                     y_count_predicted.append(0)
@@ -89,9 +107,9 @@ class GetResults:
                     car_indexes = [ i for i, x in enumerate(line[: -1]) if x == '1']
                     car_indexes = [x for x in car_indexes if x!= 0]
                     predicted_colors = self.frame_color_map[frame_num]
-
                     predicted = self.frame_car_map[frame_num]
 
+                    # Getting metrics for each car
                     for index in car_indexes:
                         actual_color = self.get_color_from_position(index)
                         
@@ -126,6 +144,7 @@ class GetResults:
         f1_sd = 2 * precisionsd * recallsd / (precisionsd + recallsd)        
         f1_model = 1 - ((f1_hb + f1_sd) / 2)
 
+
         print("The F1 score for Q1 is", f1_score(y_count_true, y_count_predicted, average="weighted"))
         print("The F1 score for Q2 is", f1_model)
         print("Accuracy for Q3 is", correctly_predicted_colors / total_colors)
@@ -138,4 +157,4 @@ class GetResults:
 
 if __name__ == "__main__":
     p = GetResults()
-    #p.get_results(pickle.load(open('output.pkl', "rb")))
+    p.get_results(pickle.load(open('output.pkl', "rb")))

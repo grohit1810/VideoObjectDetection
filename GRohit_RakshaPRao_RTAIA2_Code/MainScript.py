@@ -51,6 +51,9 @@ def detector(files):
     
 #Q3
 def type_classifier(croppedFiles, cropDir = "CropImageDir/"):
+    # Uncomment below lines for training the model
+    # tlTrain = TransferLearning()
+    # tlTrain.train_model()
     transferLearning = TransferLearning(batch_size=1)
     for file in croppedFiles:
         if(file.startswith("1_")):
