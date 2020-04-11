@@ -9,6 +9,7 @@ from ObjectDetectorTinyYolo import TinyYolo
 from CarColorDetector import ColorDetection
 from CarTypeDetector import TransferLearning
 from Results import GetResults
+from Plots import Plots
 import time
 import pickle
 import cv2
@@ -132,6 +133,9 @@ def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output
 def get_results(output):
     GetResults().get_results(output)
 
+def show_plots():
+    Plots().plot()
+
 yolo_output = pickle.load(open("TinyYolo.pkl","rb")) # for faster runtime uncomment this line
 #image_files, q1_time = question1() # for faster runtime comment this line
 #question2(image_files)  # for faster runtime comment this line
@@ -140,3 +144,4 @@ question3(croppedFiles)
 question4(croppedFiles)
 process_output()
 get_results(final_output)
+show_plots()
