@@ -31,10 +31,12 @@ class ProcessOutput:
     
     def process_color_pkl(self):
         color_dict = pickle.load(open(current_dir + "\color_detection.pkl", "rb"))
+        #print(color_dict)
         frame_color_map = defaultdict(lambda: defaultdict(int))
         for key in color_dict:
             frame_num = key[7: -4]
             frame_color_map[frame_num][color_dict[key]] += 1
+        print(frame_color_map)
         self.frame_color_map = frame_color_map
         
     def get_color_from_position(self, position):
