@@ -94,8 +94,9 @@ def color_classifier(croppedFiles, cropDir = 'CropImageDir/'):
             aftertime = time.time()
             final_output[frameNumber]['ColorDetectionTime'] = round((aftertime-beforetime), 3)
 
-def draw_box_with_annotations(img, x, y, x_plus_w, y_plus_h, car_type, car_color):
+def draw_box_with_annotations(img, x, y, x_plus_w, y_plus_h, car_type, car_color, count):
     cv2.rectangle(img, (x,y), (x_plus_w,y_plus_h), (230, 230, 230), 2)
+    cv2.putText(img, "Car count: " + count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 2)
     cv2.putText(img, car_type, (x-10,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 2)
     cv2.putText(img, car_color, (x+10,y_plus_h+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 2)
 
@@ -115,13 +116,13 @@ def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output
             count = str(final_output[frame]['Count'])
             box = yolo_output['image'+frame+".jpg"][2][0]
             x,y,w,h = box[0],box[1],box[2],box[3]
-            draw_box_with_annotations(image_file,round(x), round(y), round(x+w), round(y+h),carType1,color1)
+            draw_box_with_annotations(image_file,round(x), round(y), round(x+w), round(y+h),carType1,color1, count)
             if 'Color2' in final_output[frame].keys():
                 color2 = final_output[frame]['Color1']
                 carType2 = final_output[frame]['Type1'] 
                 box = yolo_output['image'+str(frame)+".jpg"][2][1]
                 x,y,w,h = box[0],box[1],box[2],box[3]
-                draw_box_with_annotations(image_file,round(x), round(y), round(x+w), round(y+h),carType2,color2)
+                draw_box_with_annotations(image_file,round(x), round(y), round(x+w), round(y+h),carType2,color2, count)
                 
         q1 = str(q1_time)
         q2_time = str(yolo_output['image'+frame+".jpg"][3])
