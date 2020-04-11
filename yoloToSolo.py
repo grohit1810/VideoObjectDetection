@@ -8,7 +8,7 @@ import pickle
 import cv2
 import csv
 import os
-#%%
+
 """
     Getting the images from the YOLO data
 """
@@ -16,7 +16,7 @@ class ProcessYOLOImages:
     def __init__(self):
         data_dir = os.path.dirname(os.path.realpath(__file__))
         # Data file
-        yolo_pkl_path = data_dir + "\Code\ReseachTopicsAssignment2\TinyYolo.pkl"
+        yolo_pkl_path = data_dir + "\\TinyYolo.pkl"
         self.data = pickle.load(open(yolo_pkl_path, "rb"))
         self.images_dir = data_dir + "\imageDir\\"
         self.sedans_dir = data_dir + "\imagesdata\yolodata\sedans\\"

@@ -12,7 +12,7 @@ from collections import defaultdict
 
 classes = ["hatchback", "sedan"]
 colors = ["black", "silver", "red", "white", "blue"]
-#%%
+
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
 class ProcessOutput:
