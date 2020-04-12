@@ -22,24 +22,27 @@ final_output = {}
 cropDir = 'CropImageDir/'
 
 def get_files(folder_name):
+    #function to get list of files in a folder
     files = []
     for (dirpath, dirnames, filenames) in os.walk(folder_name):
         files.extend(filenames)
         break
     return files
 
-#Q1
 def reader():
+    #this function calls the method which reads the video and converts 
+    #the video into image frames. 
+    #returns the list of frames created
     videoToFrames = ConvertVideoToFrames()
     beforetime = time.time()
     files = videoToFrames.convert_video_to_frames()
     aftertime = time.time()
     q1_time = round(((aftertime-beforetime)/len(files)), 3)
-    #print("Time to extract each frame for Q1: ",q1_time, "secs")
     return files,q1_time
 
-#Q2
 def detector(files):
+    #this functions uses tinymodel to detect car in the input image
+    #crops the image of the car from the input frame and saves the cropped image into the disk
     tinyYolo = TinyYolo()
     class_ids, confidences, boxes = tinyYolo.bound_and_crop_image(files[0])
     for file in files:
@@ -49,8 +52,8 @@ def detector(files):
         yolo_output[file[file.rfind('/')+1:]] = (class_ids, confidences, boxes, round((aftertime-beforetime), 3))
     pickle.dump(yolo_output,open("TinyYolo.pkl",'wb'))
     
-#Q3
 def type_classifier(croppedFiles, cropDir = "CropImageDir/"):
+    #this function uses mobilenet to classify the car type of input cropped frame
     # Uncomment below lines for training the model
     # tlTrain = TransferLearning()
     # tlTrain.train_model()
@@ -75,6 +78,7 @@ def type_classifier(croppedFiles, cropDir = "CropImageDir/"):
 
 #Q4
 def color_classifier(croppedFiles, cropDir = 'CropImageDir/'):
+    #this funtion uses methods from OpenCV to classify the color of the input cropped frame
     colDetection = ColorDetection()
     for file in croppedFiles:
         if(file.startswith("1_")):
@@ -95,12 +99,15 @@ def color_classifier(croppedFiles, cropDir = 'CropImageDir/'):
             final_output[frameNumber]['ColorDetectionTime'] = round((aftertime-beforetime), 3)
 
 def draw_box_with_annotations(img, x, y, x_plus_w, y_plus_h, car_type, car_color, count):
+    #This function draws bounding boxes around the image with respective annoatations
     cv2.rectangle(img, (x,y), (x_plus_w,y_plus_h), (230, 230, 230), 2)
     cv2.putText(img, "Car count: " + count, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 2)
     cv2.putText(img, car_type, (x-10,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 2)
     cv2.putText(img, car_color, (x+10,y_plus_h+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 2)
 
 def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output Images"):
+    #this function is used to combine the output from the above classifiers
+    # and create a csv file with the info gathered
     file = open(csv_file,"w+")
     printLine = "Frame No" +","+ "Count" +","+ "Type1" +","+ "Color1" +","+ "Type2" +","+ "Color2" +","+ "Question1 Time" +","+ "Question2 Time" +","+ "Question3 Time" +","+ "Question4 Time"
     file.write(printLine+"\n")
@@ -136,12 +143,15 @@ def process_output(csv_file="Output CSV.csv", final_image_folder = "Final Output
     file.close()
 
 def get_results(output):
+    #get accuracy(F1-score) for Query 1,2,3
     GetResults().get_results(output)
 
 def show_plots():
+    #plot graph of execution times for each frame
     Plots().plot()
     
 def writer():
+    #this function converts the frames with bounding boxes back to video
     converter = ConvertFramesToVideo()
     converter.frames_to_video('Final Output Images/', 'Rohit_Raksha_RTAIAssignment2_video.mp4', 25.0)
 

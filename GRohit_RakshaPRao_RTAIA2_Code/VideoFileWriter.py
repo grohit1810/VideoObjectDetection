@@ -9,7 +9,9 @@ import cv2
 from os import listdir
 from os.path import isfile, join
 class ConvertFramesToVideo():
+    
     def frames_to_video(self,pathIn,pathOut,fps):
+        #function to convert image frames to mo4 video
         frame_array = []
         files = [f for f in listdir(pathIn) if isfile(join(pathIn, f))]
         files = ['image'+str(i)+".jpg" for i in range(1,len(files)+1)]

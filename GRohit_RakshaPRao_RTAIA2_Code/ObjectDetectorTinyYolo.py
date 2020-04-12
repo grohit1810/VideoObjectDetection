@@ -8,17 +8,14 @@ Created on Sat Apr 04 02:25:59 2020
 import cv2
 import os
 import numpy as np
-import time
 from os import walk
-import pickle
 import itertools
-imageFileNames = []
-for (dirpath, dirnames, filenames) in walk("imageDir"):
-    imageFileNames.extend(filenames)
-    break
+
+
 class TinyYolo:
     
     def __init__(self, yolo_weights = "YoloConfig/yolov3-tiny.weights", yolo_config = "YoloConfig/yolov3-tiny.cfg"):
+        #initialise class variable for tinay yolo model
         self.net = cv2.dnn.readNet(yolo_weights,yolo_config) #Tiny Yolo
         self.classes = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'sofa', 'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
         self.COLORS= np.random.uniform(0,255,size=(len(self.classes),3))
@@ -27,6 +24,7 @@ class TinyYolo:
         self.font = cv2.FONT_HERSHEY_PLAIN
         
     def crop_img_and_save(self, img, class_id, x, y, x_plus_w, y_plus_h, filename_to_save):
+        #function to crop image and save image to disk
         if str(self.classes[class_id]) == "car":
             height,width,channels = img.shape
             x,y,x_plus_w, y_plus_h = max(0,x), max(0,y), max(0,x_plus_w), max(0,y_plus_h)
@@ -35,12 +33,14 @@ class TinyYolo:
             cv2.imwrite(filename_to_save, crop_img)
             
     def draw_bounding_box(self, img, class_id, confidence, x, y, x_plus_w, y_plus_h):
+        #function to draw bounding box in a input image
         label = str(self.classes[class_id])
         color = self.COLORS[class_id]
         cv2.rectangle(img, (x,y), (x_plus_w,y_plus_h), color, 2)
         cv2.putText(img, label, (x-10,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         
     def bb_intersection_over_union(self, boxA, boxB):
+        #function to calculate iou over two rectange bounding boxes
         xA = max(boxA[0], boxB[0])
         yA = max(boxA[1], boxB[1])
         xB = min(boxA[2], boxB[2])
@@ -52,12 +52,14 @@ class TinyYolo:
         return iou
     
     def create_dir_if_not_exits(self, dirname):
+        #function to create a dir if not exists
         try:
             os.mkdir(dirname)
         except FileExistsError:
             pass
 
     def remove_overlapping_boxes(self, class_ids, confidences, boxes):
+        #function to remove overlapping boxes
         boxes_comb = list(itertools.combinations(boxes, 2))
         remove_list = []
         for current_comb in boxes_comb:
@@ -78,6 +80,7 @@ class TinyYolo:
             boxes.pop(remove_index)
     
     def classify_car_image(self, filename):
+        #funciton to detect objects in the input image
         img = cv2.imread(filename)
         height,width,channels = img.shape
         blob = cv2.dnn.blobFromImage(img, (1.0/255.0), (416,416), (0,0,0), True, crop=False) 
@@ -107,6 +110,7 @@ class TinyYolo:
         return class_ids, confidences, boxes
     
     def bound_and_crop_image(self, imageFileName, storeYoloOutput = False,class_ids = "", confidences="", boxes="", yoloDirName = "TinyYoloOutput", croppedDirName = "CropImageDir"):
+        #function to store cropped image and tiny yolo output into disk
         orig_image = cv2.imread(imageFileName)
         if(storeYoloOutput):
             bound_image = cv2.imread(imageFileName)
@@ -135,6 +139,10 @@ class TinyYolo:
         
 if __name__ == "__main__":
     tinyYolo = TinyYolo()
+    imageFileNames = []
+    for (dirpath, dirnames, filenames) in walk("imageDir"):
+        imageFileNames.extend(filenames)
+        break
     for fileName in imageFileNames:
         imageFile = 'imageDir/' + fileName
         tinyYolo.bound_and_crop_image(imageFile)
